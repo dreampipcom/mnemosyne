@@ -10,24 +10,19 @@ const User = mongoose.model('User');
  * Expose
  */
 
-module.exports = new LocalStrategy(
-  {
-    usernameField: 'email',
-    passwordField: 'password'
-  },
-  function(email, password, done) {
-    const options = {
-      criteria: { email: email }
-    };
-    User.load(options, function(err, user) {
-      if (err) return done(err);
-      if (!user) {
-        return done(null, false, { message: 'Unknown user' });
-      }
-      if (!user.authenticate(password)) {
+module.exports = new LocalStrategy(function(username, password, done) {
+  User.getUserByUsername(username, function(err, user) {
+    if (err) throw err;
+    if (!user) {
+      return done(null, false, { message: 'Unknown User' });
+    }
+    User.comparePassword(password, user.password, function(err, isMatch) {
+      if (err) throw err;
+      if (isMatch) {
+        return done(null, user);
+      } else {
         return done(null, false, { message: 'Invalid password' });
       }
-      return done(null, user);
     });
-  }
-);
+  });
+});

@@ -15,8 +15,15 @@ const User = mongoose.model('User');
 
 module.exports = function(passport) {
   // serialize and deserialize sessions
-  passport.serializeUser((user, done) => done(null, user.id));
-  passport.deserializeUser((id, done) => User.findOne({ _id: id }, done));
+  passport.serializeUser(function(user, done) {
+    done(null, user.id);
+  });
+
+  passport.deserializeUser(function(id, done) {
+    User.getUserById(id, function(err, user) {
+      done(err, user);
+    });
+  });
 
   // use these strategies
   passport.use(local);

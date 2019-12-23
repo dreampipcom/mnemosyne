@@ -6,9 +6,12 @@ RUN apk upgrade
 RUN apk add bash
 
 WORKDIR /app
+COPY package.json /app
 # https://stackoverflow.com/a/32785014/232619
 COPY . /app
 RUN npm install
+RUN npm install bcryptjs -g
+RUN npm install bcryptjs
 COPY ./docker/wait-for-it.sh /usr/local
 RUN chmod +x /usr/local/wait-for-it.sh
 
