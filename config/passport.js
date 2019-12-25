@@ -6,6 +6,7 @@
 
 const mongoose = require('mongoose');
 const local = require('./passport/local');
+const jwt = require('./passport/jwt');
 
 const User = mongoose.model('User');
 
@@ -27,4 +28,5 @@ module.exports = function(passport) {
 
   // use these strategies
   passport.use(local);
+  passport.use(jwt);
 };

@@ -7,6 +7,7 @@ const session = require('express-session');
 const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const csrf = require('csurf');
@@ -36,7 +37,7 @@ module.exports = function(app, passport) {
   );
 
   // Static files middleware
-  app.use(express.static(config.root + '/public'));
+  //app.use(express.static(config.root + '/public'));
 
   // Use winston on production
   let log;
@@ -84,7 +85,15 @@ module.exports = function(app, passport) {
   );
 
   // cookieParser should be above session
-  app.use(cookieParser());
+  app.use(cookieParser(pkg.name));
+
+  // app.use(
+  //   cookieSession({
+  //     name: 'dhruidsesh',
+  //     keys: ['adhruidisamagicianofhighrankinancientcelticculture'],
+  //     maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  //   })
+  // );
   app.use(
     session({
       secret: pkg.name,
@@ -94,7 +103,8 @@ module.exports = function(app, passport) {
       store: new mongoStore({
         url: config.db,
         collection: 'sessions'
-      })
+      }),
+      cookie: { secure: false, maxAge: 60000, httpOnly: false }
     })
   );
 

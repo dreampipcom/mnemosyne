@@ -21,14 +21,6 @@ const UserSchema = new Schema({
   }
 });
 
-const BookingsSchema = Schema({
-  country: String,
-  city: String,
-  date: Date,
-  project: String,
-  link: String
-});
-
 /**
  * Add your
  * - pre-save hooks
@@ -53,13 +45,10 @@ UserSchema.static({});
  */
 
 let User = (module.exports = mongoose.model('User', UserSchema));
-let Bookings = mongoose.model('Bookings', BookingsSchema);
 
 User();
-Bookings();
 
 module.exports.createUser = function(newUser, callback) {
-  console.log('create user', newUser);
   bcrypt.genSalt(10, function(err, salt) {
     bcrypt.hash(newUser.password, salt, function(err, hash) {
       newUser.password = hash;

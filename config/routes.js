@@ -5,59 +5,117 @@
  */
 
 const mongoose = require('mongoose');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const pkg = require('../package.json');
 const home = require('../app/controllers/home');
 const User = mongoose.model('User');
-const cors = require('cors');
+const Bookings = mongoose.model('Bookings');
 
 /**
  * Expose
  */
 
 module.exports = function(app, passport) {
-  app.use(cors());
+  let corsOpt = {
+    origin: 'http://localhost:8080/',
+    credentials: true
+  };
 
-  app.get('/', home.index);
+  const isAuth = (req, res, next) => {
+    if (!passport.authenticate('jwt', { session: false })) {
+      res.status(401).send('You are not authenticated');
+    } else {
+      console.log("You're logged in!");
+      return next();
+    }
+  };
+
+  app.options('*', cors(corsOpt));
+  app.use(cors(corsOpt));
+
+  // app.get('/', home.index);
 
   // Register User
-  app.post('/api-v1/register', function(req, res) {
-    var password = req.body.password1;
-    var password2 = req.body.password2;
+  // app.post('/api-v1/register', function(req, res) {
+  //   var password = req.body.password1;
+  //   var password2 = req.body.password2;
 
-    if (password == password2) {
-      var newUser = new User({
-        name: req.body.name,
-        email: req.body.email,
-        username: req.body.username,
-        password: req.body.password1
-      });
-      User.createUser(newUser, function(err, user) {
-        if (err) throw err;
-        res.send(user).end();
-      });
-    } else {
-      res
-        .status(500)
-        .send('{errors: "Passwords don\'t match"}')
-        .end();
-    }
-  });
+  //   if (password == password2) {
+  //     var newUser = new User({
+  //       name: req.body.name,
+  //       email: req.body.email,
+  //       username: req.body.username,
+  //       password: req.body.password1
+  //     });
+  //     User.createUser(newUser, function(err, user) {
+  //       if (err) throw err;
+  //       res.send(user).end();
+  //     });
+  //   } else {
+  //     res
+  //       .status(500)
+  //       .send('{errors: "Passwords don\'t match"}')
+  //       .end();
+  //   }
+  // });
 
   // Endpoint to login
-  app.post('/api-v1/login', passport.authenticate('local'), function(req, res) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.sendStatus(200);
-    res.send(req.user);
-  });
+  app.post(
+    '/api-v1/login',
+    passport.authenticate('local', { session: false }),
+    function(req, res) {
+      let user = req.user;
+      if (!user) {
+        res.status(400);
+      }
 
-  // Endpoint to get current user
-  app.get('/api-v1/user', function(req, res) {
-    res.send(req.user);
+      /** This is what ends up in our JWT */
+      const payload = {
+        username: user.username,
+        expires: Date.now() + 24 * 60 * 60 * 1000
+      };
+
+      /** assigns payload to req.user */
+      req.login(payload, { session: false }, error => {
+        if (error) {
+          res.status(400).send({ error });
+        }
+
+        /** generate a signed json web token and return it in the response */
+        const token = jwt.sign(JSON.stringify(payload), pkg.name);
+
+        /** assign our jwt to the cookie */
+        res.cookie('jwt', token, { httpOnly: true, secure: true });
+        res.status(200).send({ user: user, token: token });
+      });
+    }
+  );
+
+  // Endpoint to get current user data
+  app.post('/api-v1/userdata', isAuth, function(req, res) {
+    let id = req.body.id;
+    User.findById({ _id: id }, (err, user) => {
+      user.populate('bookedDates', (err, fullUser) => {
+        res.send(fullUser);
+      });
+    });
   });
 
   // Endpoint to logout
-  app.get('/api-v1/logout', function(req, res) {
+  app.get('/api-v1/logout', isAuth, function(req, res) {
     req.logout();
     res.send(null);
+  });
+
+  // Endpoint to add Bookings data
+  app.post('/api-v1/bookings', isAuth, function(req, res) {
+    let newBooking = new Bookings({
+      ...req.body.payload
+    });
+    Bookings.addBooking(req.body.id, newBooking, (err, user) => {
+      res.send(user).end();
+    });
   });
 
   /**
