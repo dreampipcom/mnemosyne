@@ -1,6 +1,8 @@
 const passportJWT = require('passport-jwt');
 const JWTStrategy = passportJWT.Strategy;
 const pkg = require('../../package.json');
+const mongoose = require('mongoose');
+const User = mongoose.model('User');
 
 module.exports = new JWTStrategy(
   {
@@ -8,10 +10,15 @@ module.exports = new JWTStrategy(
     secretOrKey: pkg.name
   },
   (jwtPayload, done) => {
+    console.log('here');
     if (Date.now() > jwtPayload.expires) {
       return done('jwt expired');
     }
-
-    return done(null, jwtPayload);
+    User.getUserByUsername(jwtPayload.username, function(err, user) {
+      if (err) throw err;
+      if (user) {
+        return done(null, user);
+      }
+    });
   }
 );

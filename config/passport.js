@@ -27,6 +27,6 @@ module.exports = function(passport) {
   });
 
   // use these strategies
-  passport.use(local);
   passport.use(jwt);
+  passport.use(local);
 };

@@ -18,18 +18,11 @@ const Bookings = mongoose.model('Bookings');
 
 module.exports = function(app, passport) {
   let corsOpt = {
-    origin: 'http://localhost:8080/',
+    origin: 'http://localhost:8080',
     credentials: true
   };
 
-  const isAuth = (req, res, next) => {
-    if (!passport.authenticate('jwt', { session: false })) {
-      res.status(401).send('You are not authenticated');
-    } else {
-      console.log("You're logged in!");
-      return next();
-    }
-  };
+  let isAuth = passport.authenticate('jwt', { session: false });
 
   app.options('*', cors(corsOpt));
   app.use(cors(corsOpt));
@@ -86,7 +79,7 @@ module.exports = function(app, passport) {
         const token = jwt.sign(JSON.stringify(payload), pkg.name);
 
         /** assign our jwt to the cookie */
-        res.cookie('jwt', token, { httpOnly: true, secure: true });
+        res.cookie('jwt', token, { httpOnly: false, secure: false });
         res.status(200).send({ user: user, token: token });
       });
     }
@@ -94,7 +87,7 @@ module.exports = function(app, passport) {
 
   // Endpoint to get current user data
   app.post('/api-v1/userdata', isAuth, function(req, res) {
-    let id = req.body.id;
+    let id = req.user._id;
     User.findById({ _id: id }, (err, user) => {
       user.populate('bookedDates', (err, fullUser) => {
         res.send(fullUser);
@@ -115,6 +108,14 @@ module.exports = function(app, passport) {
     });
     Bookings.addBooking(req.body.id, newBooking, (err, user) => {
       res.send(user).end();
+    });
+  });
+
+  // Endpoint to delete Bookings data
+  app.delete('/api-v1/bookings', isAuth, function(req, res) {
+    let id = req.body.id;
+    Bookings.deleteBooking(id, () => {
+      res.sendStatus(200).end();
     });
   });
 

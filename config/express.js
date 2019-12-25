@@ -27,7 +27,7 @@ const env = process.env.NODE_ENV || 'development';
  */
 
 module.exports = function(app, passport) {
-  app.use(helmet());
+  app.use(helmet.noCache());
 
   // Compression middleware (should be placed before express.static)
   app.use(
