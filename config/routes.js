@@ -17,15 +17,15 @@ const Bookings = mongoose.model('Bookings');
  */
 
 module.exports = function(app, passport) {
-  let corsOpt = {
-    origin: 'http://localhost:8080',
-    credentials: true
-  };
+  // let corsOpt = {
+  //   origin: 'http://localhost:8080',
+  //   credentials: true
+  // };
 
   let isAuth = passport.authenticate('jwt', { session: false });
 
-  app.options('*', cors(corsOpt));
-  app.use(cors(corsOpt));
+  //app.options('*', cors(corsOpt));
+  //app.use(cors(corsOpt));
 
   // app.get('/', home.index);
 
@@ -79,7 +79,7 @@ module.exports = function(app, passport) {
         const token = jwt.sign(JSON.stringify(payload), pkg.name);
 
         /** assign our jwt to the cookie */
-        res.cookie('jwt', token, { httpOnly: false, secure: false });
+        res.cookie('jwt', token, { httpOnly: true, secure: true });
         res.status(200).send({ user: user, token: token });
       });
     }
