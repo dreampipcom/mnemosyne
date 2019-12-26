@@ -108,6 +108,7 @@ module.exports = function(app, passport) {
       user.populate('bookedDates', (err, fullUser) => {
         let dateOffset = 24 * 60 * 60 * 1000 * 2; //2 days
         let now = new Date() - dateOffset;
+        now.setTime(now.getTime() - dateOffset);
         let nextDates = fullUser.bookedDates.filter(el => {
           return (
             el.date > now &&
