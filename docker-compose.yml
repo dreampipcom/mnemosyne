@@ -8,7 +8,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    command: /usr/local/wait-for-it.sh 192.168.0.72:27021 -- npm start
+    command: /usr/local/wait-for-it.sh 192.168.0.72:27017 -- npm start
     env_file:
       - .env
     ports:
