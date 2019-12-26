@@ -30,28 +30,28 @@ module.exports = function(app, passport) {
   // app.get('/', home.index);
 
   // Register User
-  // app.post('/api-v1/register', function(req, res) {
-  //   var password = req.body.password1;
-  //   var password2 = req.body.password2;
+  app.post('/api-v1/register', function(req, res) {
+    var password = req.body.password1;
+    var password2 = req.body.password2;
 
-  //   if (password == password2) {
-  //     var newUser = new User({
-  //       name: req.body.name,
-  //       email: req.body.email,
-  //       username: req.body.username,
-  //       password: req.body.password1
-  //     });
-  //     User.createUser(newUser, function(err, user) {
-  //       if (err) throw err;
-  //       res.send(user).end();
-  //     });
-  //   } else {
-  //     res
-  //       .status(500)
-  //       .send('{errors: "Passwords don\'t match"}')
-  //       .end();
-  //   }
-  // });
+    if (password == password2) {
+      var newUser = new User({
+        name: req.body.name,
+        email: req.body.email,
+        username: req.body.username,
+        password: req.body.password1
+      });
+      User.createUser(newUser, function(err, user) {
+        if (err) throw err;
+        res.send(user).end();
+      });
+    } else {
+      res
+        .status(500)
+        .send('{errors: "Passwords don\'t match"}')
+        .end();
+    }
+  });
 
   // Endpoint to login
   app.post(
