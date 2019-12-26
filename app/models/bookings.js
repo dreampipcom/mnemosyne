@@ -7,6 +7,7 @@ const BookingsSchema = Schema({
   city: { type: String, required: true },
   date: { type: Date, required: true },
   project: { type: String, required: true },
+  format: { type: String, required: true },
   link: String
 });
 
@@ -18,7 +19,6 @@ module.exports.addBooking = function(userId, bookingData, callback) {
   bookingData.save((err, booking) => {
     console.log(booking);
     User.findById({ _id: userId }, (err, user) => {
-      console.log(user);
       user.bookedDates.push(booking);
       user.save(callback);
     });
@@ -26,8 +26,19 @@ module.exports.addBooking = function(userId, bookingData, callback) {
 };
 
 module.exports.editBooking = function(bookingId, bookingData, callback) {
+  bookingData = bookingData.payload;
   let query = { _id: bookingId };
-  Bookings.findOneAndUpdate(query, bookingData, callback);
+  Bookings.findOne(query, (err, booking) => {
+    booking.country = bookingData.country;
+    booking.city = bookingData.city;
+    booking.project = bookingData.project;
+    booking.link = bookingData.link;
+    booking.date = bookingData.date;
+    booking.format = bookingData.format;
+
+    console.log('new', booking);
+    booking.save(callback);
+  });
 };
 
 module.exports.deleteBooking = function(bookingId, callback) {

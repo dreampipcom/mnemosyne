@@ -1,10 +1,10 @@
 {
-  "name": "node-express-mongoose",
-  "description": "A boilerplate application for node, mongo",
+  "name": "dhruid-v2-server",
+  "description": "MEVN server for Dhruid artist page.",
   "version": "1.0.0",
   "author": {
-    "name": "Madhusudhan Srinivasa",
-    "email": "me@madhums.me"
+    "name": "Angelo Reale",
+    "email": "angelo@reale.cc"
   },
   "engines": {
     "node": ">=10.x"
@@ -58,7 +58,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/madhums/node-express-mongoose.git"
+    "url": "git@github.com:angeloreale/dhruid-v2-server.git"
   },
   "keywords": [
     "node",
