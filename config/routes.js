@@ -106,9 +106,8 @@ module.exports = function(app, passport) {
     let username = (req.user && req.user.username) || process.env.PUBLIC_USER;
     User.getUserByUsername(username, (err, user) => {
       user.populate('bookedDates', (err, fullUser) => {
-        let dateOffset = 24 * 60 * 60 * 1000 * 2; //2 days
-        let now = new Date() - dateOffset;
-        now.setTime(now.getTime() - dateOffset);
+        // let dateOffset = 24 * 60 * 60 * 1000 * 2; //2 days
+        let now = new Date(new Date().setDate(new Date().getDate() - 2));
         let nextDates = fullUser.bookedDates.filter(el => {
           return (
             el.date > now &&
