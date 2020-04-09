@@ -3,9 +3,7 @@ const Schema = mongoose.Schema;
 const Profile = require('./profile');
 
 const HelpSchema = Schema({
-  user: {
-    type: [{ type: Schema.Types.ObjectId, ref: 'User' }]
-  },
+  user: { type: Schema.Types.ObjectId, ref: 'User' },
   stats: {
     views: { type: Number, default: 0 },
     clicked_message: { type: Number, default: 0 },
@@ -44,7 +42,7 @@ Help();
 
 module.exports.addHelp = function(userId, helpData, callback) {
   Profile.User.findById({ _id: userId }, (err, user) => {
-    helpData.user.push(user)
+    helpData.user = user
     helpData.save((err, help) => {
       console.log(help);
       Profile.User.findById({ _id: userId }, (err, user) => {

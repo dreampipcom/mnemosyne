@@ -18,8 +18,8 @@ const UserSchema = new Schema({
     email: { type: String, default: '', unique: true, required: true },
     paypal: { type: String, default: '', unique: false },
     whatsapp: { type: String, default: '', unique: false, required: true },
-    gender: { type: String, default: '3', unique: false, required: true },
-    account_type: { type: String, default: '0', unique: false }
+    gender: { type: Number, default: 3, unique: false, required: true },
+    account_type: { type: Number, default: 0, unique: false }
   },
   my_helps: {
     type: [{ type: Schema.Types.ObjectId, ref: 'Help' }]
