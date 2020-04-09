@@ -188,15 +188,29 @@ module.exports = function(app, passport) {
   //   });
   // });
 
-  app.get('/api-v1/all-helps', isAuth, function(req, res) {
-    Help.find((err, helps) => {
-      helps.forEach(help => {
-        help.populate('who_is_helping', (err, fullHelp) => {
-          res.send(fullHelp);
-        });
+  // app.get('/api-v1/all-helps', isAuth, function(req, res) {
+  //   Help.find((err, helps) => {
+  //       helps.populate('who_is_helping.user', (err, fullHelp) => {
+  //         res.send(fullHelp);
+  //       });
+  //   });
+  // });
+  app.get('/api-v1/all-helps', isAuth,  function(req, res) {
+    let all_helps = []
+    let process = Help.find( (err, helps) => { 
+      helps.forEach( (help, i) => {
+        help.populate('user',  (err, fullhelp) => {
+          all_helps.push(fullhelp)
+          if (i === helps.length - 1) {
+            res.send(all_helps);
+          }
+        })
       })
-    });
-  });
+    })
+  })
+
+
+  
 
   // Endpoint to add Help data
   app.post('/api-v1/help', isAuth, function(req, res) {

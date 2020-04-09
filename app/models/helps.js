@@ -33,7 +33,7 @@ const HelpSchema = Schema({
   },
   who_is_helping: [{
     user: { type: Schema.Types.ObjectId, ref: 'User' },
-    hasHelped: { type: Boolean, default: 0 }
+    hasHelped: { type: Number, default: 0 }
   }]
 });
 
