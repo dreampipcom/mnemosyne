@@ -84,7 +84,6 @@ module.exports.User.createUser = function(newUser, callback) {
 
 module.exports.User.getUserByUsername = function(username, callback) {
   var query = { username: username };
-  console.log(query)
   User.findOne(query, callback);
 };
 
@@ -93,7 +92,6 @@ module.exports.User.getUserById = function(id, callback) {
 };
 
 module.exports.User.comparePassword = function(candidatePassword, hash, callback) {
-  console.log(candidatePassword, hash)
   bcrypt.compare(candidatePassword, hash, function(err, isMatch) {
     if (err) throw err;
     callback(null, isMatch);

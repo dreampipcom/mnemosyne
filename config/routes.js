@@ -242,13 +242,23 @@ module.exports = function(app, passport) {
         } else if (already > -1) {
           res.status(403).send({ message: "Can't help twice!" })
         } else {
-          console.log("assuming")
           Help.assumeHelp(help_id, help, req.body.uid, (err, help) => {
             res.send(help).end();
           });
         }
       })
   });
+
+  // Endpoint to asusme help
+  app.post('/api-v1/evaluate-help', isAuth, function(req, res) {
+    let help_id = req.body.help_id
+    let helper_id = req.body.helper_id
+    let payload = req.body.new_status
+    
+      Help.evaluateHelp(help_id, helper_id, payload, (err, help) => {
+        res.send(help).end();
+      });
+});
 
   // // Endpoint to add Bookings data
   // app.put('/api-v1/bookings', isAuth, function(req, res) {

@@ -30,7 +30,7 @@ const HelpSchema = Schema({
     other_reward: { type: String, required: false }
   },
   who_is_helping: [{
-    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    user: { type: Schema.Types.ObjectId, ref: 'User', unique: true },
     hasHelped: { type: Number, default: 0 }
   }]
 });
@@ -49,7 +49,6 @@ module.exports.addHelp = function(userId, helpData, callback) {
   Profile.User.findById({ _id: userId }, (err, user) => {
     helpData.user = user
     helpData.save((err, help) => {
-      console.log(help);
       Profile.User.findById({ _id: userId }, (err, user) => {
         user.my_helps.push(help);
         user.save(callback);
@@ -69,6 +68,17 @@ module.exports.assumeHelp = function(helpId, help, userId, callback) {
     })
   });
 };
+
+module.exports.evaluateHelp = function(help_id, helper_id, payload, callback) {
+  Help.findOne( {_id: help_id }, function(err, the_help) {
+    the_help.who_is_helping.forEach(function (el) {
+      if(el._id == helper_id) {
+        el.hasHelped = payload
+      }
+    })
+    the_help.save(callback)
+  });
+}
 
 // module.exports.editBooking = function(bookingId, helpData, callback) {
 //   helpData = helpData.payload;
