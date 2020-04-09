@@ -93,8 +93,10 @@ module.exports = function(app, passport) {
   app.post('/api-v1/userdata', isAuth, function(req, res) {
     let id = req.user._id;
     User.findById({ _id: id }, (err, user) => {
-      user.populate('bookedDates', (err, fullUser) => {
-        res.send(fullUser);
+      user.populate('my_helps', (err, partialUser) => {
+        partialUser.populate('im_helping', (err, fullUser) => {
+          res.send(fullUser);
+        });
       });
     });
   });
@@ -149,8 +151,8 @@ module.exports = function(app, passport) {
   //   });
   // });
 
-  // // Endpoint to get ALL Bookings data
-  // app.get('/api-v1/allbookings', isAuth, function(req, res) {
+  // Endpoint to get ALL Bookings data
+  // app.get('/api-v1/all-helps', isAuth, function(req, res) {
   //   let username = (req.user && req.user.username) || process.env.PUBLIC_USER;
   //   User.getUserByUsername(username, (err, user) => {
   //     user.populate('bookedDates', (err, fullUser) => {
@@ -185,6 +187,16 @@ module.exports = function(app, passport) {
   //     });
   //   });
   // });
+
+  app.get('/api-v1/all-helps', isAuth, function(req, res) {
+    Help.find((err, helps) => {
+      helps.forEach(help => {
+        help.populate('who_is_helping', (err, fullHelp) => {
+          res.send(fullHelp);
+        });
+      })
+    });
+  });
 
   // Endpoint to add Help data
   app.post('/api-v1/help', isAuth, function(req, res) {
