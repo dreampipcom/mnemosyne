@@ -35,6 +35,11 @@ const HelpSchema = Schema({
   }]
 });
 
+HelpSchema.pre('find', function() {
+  this.populate('user');
+  this.populate('who_is_helping');
+});
+
 
 let Help = (module.exports = mongoose.model('Help', HelpSchema));
 
@@ -50,6 +55,16 @@ module.exports.addHelp = function(userId, helpData, callback) {
         user.save(callback);
       });
     });
+  });
+};
+
+module.exports.assumeHelp = function(help, userId, callback) {
+  Profile.User.findById({ _id: userId }, (err, user) => {
+    user.im_helping.push(help)
+    user.save(() => {
+      help.who_is_helping.push({ user:user, hasHelped:0 })
+      help.save(callback)
+    })
   });
 };
 

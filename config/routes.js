@@ -104,7 +104,11 @@ module.exports = function(app, passport) {
   // Endpoint to logout
   app.get('/api-v1/logout', isAuth, function(req, res) {
     req.logout();
-    res.send(null);
+    req.session.destroy(function (err) {
+      if (err) { return next(err); }
+      // The response should indicate that the user is no longer authenticated.
+      return res.send({ authenticated: req.isAuthenticated() });
+    });
   });
 
   // // Endpoint to get Bookings data
@@ -197,14 +201,15 @@ module.exports = function(app, passport) {
   // });
   app.get('/api-v1/all-helps', isAuth,  function(req, res) {
     let all_helps = []
-    let process = Help.find( (err, helps) => { 
-      helps.forEach( (help, i) => {
-        help.populate('user',  (err, fullhelp) => {
-          all_helps.push(fullhelp)
-          if (i === helps.length - 1) {
-            res.send(all_helps);
-          }
-        })
+    Help.find( (err, helps) => { 
+      res.send(helps);
+    })
+  })
+
+  app.get('/api-v1/help/:id', isAuth,  function(req, res) {
+    Help.findOne({ _id: req.params.id }, (err, help) => { 
+      help.populate('user',  (err, fullhelp) => {
+          res.send(fullhelp);
       })
     })
   })
@@ -220,6 +225,25 @@ module.exports = function(app, passport) {
     Help.addHelp(req.body.id, newHelp, (err, user) => {
       res.send(user).end();
     });
+  });
+
+
+  // Endpoint to asusme help
+  app.post('/api-v1/assume-help', isAuth, function(req, res) {
+      let help_id = req.body.payload.help_id
+      let uid = req.body.uid
+      
+      Help.findOne({_id:help_id}, (err, help) => {
+        console.log(help_id, uid, help.user._id)
+        if (help.user._id == uid) {
+          res.status(403).send({ message: "Can't help yourself!" })
+        } else {
+          console.log("assuming")
+          // Help.assumeHelp(help, req.body.uid, (err, help) => {
+          //   res.send(help).end();
+          // });
+        }
+      })
   });
 
   // // Endpoint to add Bookings data
