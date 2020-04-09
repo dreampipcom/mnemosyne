@@ -83,21 +83,21 @@ module.exports = function(app, passport) {
         const token = jwt.sign(JSON.stringify(payload), pkg.name);
 
         /** assign our jwt to the cookie */
-        res.cookie('jwt', token, { httpOnly: true, secure: true });
-        res.status(200).send({ user: user, token: token });
+        res.cookie('jwt', token, { httpOnly: true, secure: false });
+        res.status(200).send({ username: user.username, token: token });
       });
     }
   );
 
-  // // Endpoint to get current user data
-  // app.post('/api-v1/userdata', isAuth, function(req, res) {
-  //   let id = req.user._id;
-  //   User.findById({ _id: id }, (err, user) => {
-  //     user.populate('bookedDates', (err, fullUser) => {
-  //       res.send(fullUser);
-  //     });
-  //   });
-  // });
+  // Endpoint to get current user data
+  app.post('/api-v1/userdata', isAuth, function(req, res) {
+    let id = req.user._id;
+    User.findById({ _id: id }, (err, user) => {
+      user.populate('bookedDates', (err, fullUser) => {
+        res.send(fullUser);
+      });
+    });
+  });
 
   // Endpoint to logout
   app.get('/api-v1/logout', isAuth, function(req, res) {

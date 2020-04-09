@@ -10,7 +10,6 @@ module.exports = new JWTStrategy(
     secretOrKey: pkg.name
   },
   (jwtPayload, done) => {
-    console.log('here');
     if (Date.now() > jwtPayload.expires) {
       return done('jwt expired');
     }
