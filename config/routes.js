@@ -234,14 +234,18 @@ module.exports = function(app, passport) {
       let uid = req.body.uid
       
       Help.findOne({_id:help_id}, (err, help) => {
-        console.log(help_id, uid, help.user._id)
+        let already = help.who_is_helping.findIndex(el => {
+          return el.user === uid
+        })
         if (help.user._id == uid) {
           res.status(403).send({ message: "Can't help yourself!" })
+        } else if (already) {
+          res.status(403).send({ message: "Can't help twice!" })
         } else {
           console.log("assuming")
-          // Help.assumeHelp(help, req.body.uid, (err, help) => {
-          //   res.send(help).end();
-          // });
+          Help.assumeHelp(help, req.body.uid, (err, help) => {
+            res.send(help).end();
+          });
         }
       })
   });
