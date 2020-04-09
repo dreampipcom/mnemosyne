@@ -73,10 +73,16 @@ module.exports.evaluateHelp = function(help_id, helper_id, payload, callback) {
   Help.findOne( {_id: help_id }, function(err, the_help) {
     the_help.who_is_helping.forEach(function (el) {
       if(el._id == helper_id) {
+        let old_value = el.hasHelped
         el.hasHelped = payload
+        the_help.save(() => {
+          Profile.User.findOne({_id:el.user}, (err, user) => {
+            user.stats.points = user.stats.points + (payload - old_value)
+            user.save(callback)
+          })
+        })
       }
     })
-    the_help.save(callback)
   });
 }
 
