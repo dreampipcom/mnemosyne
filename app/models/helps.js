@@ -53,7 +53,6 @@ module.exports.addHelp = function(userId, helpData, callback) {
       });
     });
   });
-
 };
 
 // module.exports.editBooking = function(bookingId, helpData, callback) {
