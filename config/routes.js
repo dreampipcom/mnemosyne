@@ -34,7 +34,7 @@ module.exports = function(app, passport) {
     var password = req.body.password;
     var password2 = req.body.password_verify;
 
-    if (password.length >= 6 && password === password2) {
+    if (password && password.length >= 6 && password2 && password === password2) {
       var newUser = new User({
         username: req.body.username,
         password: password,
