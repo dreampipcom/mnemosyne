@@ -94,26 +94,13 @@ module.exports = function(app, passport) {
   //     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   //   })
   // );
-  app.use(
-    session({
-      secret: pkg.name,
-      proxy: true,
-      resave: true,
-      saveUninitialized: true,
-      store: new mongoStore({
-        url: config.db,
-        collection: 'sessions'
-      }),
-      cookie: { secure: false, maxAge: 60000, httpOnly: false }
-    })
-  );
 
   // use passport session
   app.use(passport.initialize());
   app.use(passport.session());
 
   // connect flash for flash messages - should be declared after sessions
-  app.use(flash());
+  // app.use(flash());
 
   // should be declared after session and flash
   app.use(helpers(pkg.name));

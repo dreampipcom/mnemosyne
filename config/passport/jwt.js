@@ -6,7 +6,7 @@ const User = mongoose.model('User');
 
 module.exports = new JWTStrategy(
   {
-    jwtFromRequest: req => req.cookies.jwt,
+    jwtFromRequest: passportJWT.ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: pkg.name
   },
   (jwtPayload, done) => {

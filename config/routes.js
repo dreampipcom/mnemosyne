@@ -83,7 +83,7 @@ module.exports = function(app, passport) {
         const token = jwt.sign(JSON.stringify(payload), pkg.name);
 
         /** assign our jwt to the cookie */
-        res.cookie('jwt', token, { httpOnly: true, secure: process.env.IS_SECURE });
+        //res.cookie('jwt', token, { httpOnly: true, secure: process.env.IS_SECURE });
         res.status(200).send({ username: user.username, token: token });
       });
     }
@@ -104,11 +104,7 @@ module.exports = function(app, passport) {
   // Endpoint to logout
   app.get('/api-v1/logout', isAuth, function(req, res) {
     req.logout();
-    req.session.destroy(function (err) {
-      if (err) { return next(err); }
-      // The response should indicate that the user is no longer authenticated.
-      return res.send({ authenticated: req.isAuthenticated() });
-    });
+    return res.send({ authenticated: req.isAuthenticated() });
   });
 
   // // Endpoint to get Bookings data
