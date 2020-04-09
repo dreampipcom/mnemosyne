@@ -260,6 +260,14 @@ module.exports = function(app, passport) {
       });
 });
 
+// Endpoint to asusme help
+app.post('/api-v1/complete-help', isAuth, function(req, res) {
+  let help_id = req.body.help_id
+  Help.completeHelp(help_id, (err, help) => {
+    res.send(help.stats.completed).end();
+  });
+});
+
   // // Endpoint to add Bookings data
   // app.put('/api-v1/bookings', isAuth, function(req, res) {
   //   Bookings.editBooking(req.body.id, req.body.payload, (err, booking) => {

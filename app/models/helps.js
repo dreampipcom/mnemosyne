@@ -86,6 +86,13 @@ module.exports.evaluateHelp = function(help_id, helper_id, payload, callback) {
   });
 }
 
+module.exports.completeHelp = function(help_id, callback) {
+  Help.findOne( {_id: help_id }, function(err, the_help) {
+    the_help.stats.completed = true
+    the_help.save(callback)
+  });
+}
+
 // module.exports.editBooking = function(bookingId, helpData, callback) {
 //   helpData = helpData.payload;
 //   let query = { _id: bookingId };
