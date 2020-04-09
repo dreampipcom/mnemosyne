@@ -83,7 +83,7 @@ module.exports = function(app, passport) {
         const token = jwt.sign(JSON.stringify(payload), pkg.name);
 
         /** assign our jwt to the cookie */
-        res.cookie('jwt', token, { httpOnly: true, secure: false });
+        res.cookie('jwt', token, { httpOnly: true, secure: process.env.IS_SECURE });
         res.status(200).send({ username: user.username, token: token });
       });
     }
