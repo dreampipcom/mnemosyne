@@ -37,7 +37,7 @@ const HelpSchema = Schema({
 
 HelpSchema.pre('find', function() {
   this.populate('user');
-  this.populate('who_is_helping');
+  this.populate('who_is_helping.user');
 });
 
 
@@ -58,12 +58,14 @@ module.exports.addHelp = function(userId, helpData, callback) {
   });
 };
 
-module.exports.assumeHelp = function(help, userId, callback) {
+module.exports.assumeHelp = function(helpId, help, userId, callback) {
   Profile.User.findById({ _id: userId }, (err, user) => {
     user.im_helping.push(help)
     user.save(() => {
-      help.who_is_helping.push({ user:user, hasHelped:0 })
-      help.save(callback)
+      Help.findById({ _id:helpId }, (err, the_help) => {
+        the_help.who_is_helping.push({ ... { user: user, hasHelped: 0 } })
+        the_help.save(callback)
+      })
     })
   });
 };

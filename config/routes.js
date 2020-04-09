@@ -239,11 +239,11 @@ module.exports = function(app, passport) {
         })
         if (help.user._id == uid) {
           res.status(403).send({ message: "Can't help yourself!" })
-        } else if (already) {
+        } else if (already > -1) {
           res.status(403).send({ message: "Can't help twice!" })
         } else {
           console.log("assuming")
-          Help.assumeHelp(help, req.body.uid, (err, help) => {
+          Help.assumeHelp(help_id, help, req.body.uid, (err, help) => {
             res.send(help).end();
           });
         }
