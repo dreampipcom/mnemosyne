@@ -12,7 +12,7 @@ services:
     env_file:
       - .env
     ports:
-      - 3000:3000
+      - 3033:3000
     depends_on:
       - mongo
     restart: always
@@ -23,7 +23,7 @@ services:
     image: mongo
     restart: always
     ports:
-      - 27021:27017
+      - 27033:27017
     volumes:
       - ./data:/data/db
     networks:
