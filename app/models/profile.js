@@ -10,15 +10,15 @@ const Schema = mongoose.Schema;
  */
 
 const UserSchema = new Schema({
-  username: { type: String, unique: true },
+  username: { type: String, unique: true, required: true },
   password: {
-    type: String
+    type: String, required: true
   },
   data:  {
-    email: { type: String, default: '', unique: true },
+    email: { type: String, default: '', unique: true, required: true },
     paypal: { type: String, default: '', unique: false },
-    whatsapp: { type: String, default: '', unique: false },
-    gender: { type: String, default: '3', unique: false },
+    whatsapp: { type: String, default: '', unique: false, required: true },
+    gender: { type: String, default: '3', unique: false, required: true },
     account_type: { type: String, default: '0', unique: false }
   },
   my_helps: {

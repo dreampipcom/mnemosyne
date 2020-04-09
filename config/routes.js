@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 const pkg = require('../package.json');
 const home = require('../app/controllers/home');
 const User = mongoose.model('User');
-//const Helps = mongoose.model('Helps');
+const Help = mongoose.model('Help');
 
 /**
  * Expose
@@ -186,15 +186,15 @@ module.exports = function(app, passport) {
   //   });
   // });
 
-  // // Endpoint to add Bookings data
-  // app.post('/api-v1/bookings', isAuth, function(req, res) {
-  //   let newBooking = new Bookings({
-  //     ...req.body.payload
-  //   });
-  //   Bookings.addBooking(req.body.id, newBooking, (err, user) => {
-  //     res.send(user).end();
-  //   });
-  // });
+  // Endpoint to add Help data
+  app.post('/api-v1/help', isAuth, function(req, res) {
+    let newHelp = new Help({
+      ...req.body.payload
+    });
+    Help.addHelp(req.body.id, newHelp, (err, user) => {
+      res.send(user).end();
+    });
+  });
 
   // // Endpoint to add Bookings data
   // app.put('/api-v1/bookings', isAuth, function(req, res) {
