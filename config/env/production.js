@@ -3,5 +3,5 @@
  */
 
 module.exports = {
-  db: process.env.MONGODB_URL || 'mongodb://localhost/dhruid_v2_prod'
+  db: process.env.MONGODB_URL || 'mongodb://localhost/letshero_prod'
 };

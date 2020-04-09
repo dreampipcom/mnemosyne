@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const User = require('./user');
+const Profile = require('./profile');
 
 const BookingsSchema = Schema({
   country: { type: String, required: true },
@@ -18,7 +18,7 @@ Bookings();
 module.exports.addBooking = function(userId, bookingData, callback) {
   bookingData.save((err, booking) => {
     console.log(booking);
-    User.findById({ _id: userId }, (err, user) => {
+    Profile.findById({ _id: PId }, (err, user) => {
       user.bookedDates.push(booking);
       user.save(callback);
     });
