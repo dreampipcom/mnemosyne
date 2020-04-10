@@ -48,7 +48,11 @@ Help();
 module.exports.addHelp = function(userId, helpData, callback) {
   Profile.User.findById({ _id: userId }, (err, user) => {
     helpData.user = user
+    console.log(helpData)
     helpData.save((err, help) => {
+      if (err) {
+        res.send(err).end()
+      }
       Profile.User.findById({ _id: userId }, (err, user) => {
         user.my_helps.push(help);
         user.save(callback);
