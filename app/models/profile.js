@@ -15,7 +15,7 @@ const UserSchema = new Schema({
     type: String, required: true
   },
   data:  {
-    email: { type: String, default: '', unique: true, required: true },
+    email: { type: String, default: '', unique: false, required: true },
     paypal: { type: String, default: '', unique: false },
     whatsapp: { type: String, default: '', unique: false, required: true },
     gender: { type: Number, default: 3, unique: false, required: true },
