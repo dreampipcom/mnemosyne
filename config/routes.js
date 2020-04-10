@@ -220,6 +220,9 @@ module.exports = function(app, passport) {
     });
     console.log(newHelp)
     Help.addHelp(req.body.id, newHelp, (err, user) => {
+      if (err) {
+        res.status(500).send(err)
+      }
       res.send(user).end();
     });
   });
