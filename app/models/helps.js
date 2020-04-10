@@ -30,7 +30,7 @@ const HelpSchema = Schema({
     other_reward: { type: String, required: false }
   },
   who_is_helping: [{
-    user: { type: Schema.Types.ObjectId, ref: 'User', unique: true },
+    user: { type: Schema.Types.ObjectId, ref: 'User', unique: true, sparse: true },
     hasHelped: { type: Number, default: 0 }
   }]
 });
