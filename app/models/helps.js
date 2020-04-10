@@ -80,7 +80,7 @@ module.exports.evaluateHelp = function(help_id, helper_id, payload, callback) {
         el.hasHelped = payload
         the_help.save(() => {
           Profile.User.findOne({_id:el.user}, (err, user) => {
-            user.stats.points = user.stats.points + (payload - old_value)
+            user.stats.points = user.stats.points + (((payload - old_value)) * (5 - the_help.category.urgency))
             user.save(callback)
           })
         })
