@@ -218,7 +218,6 @@ module.exports = function(app, passport) {
     let newHelp = new Help({
       ...req.body.payload
     });
-    console.log(newHelp)
     Help.addHelp(req.body.id, newHelp, (err, user) => {
       if (err) {
         res.status(500).send(err).end()
