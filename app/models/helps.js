@@ -9,7 +9,7 @@ const HelpSchema = Schema({
     clicked_message: { type: Number, default: 0 },
     clicked_donate: { type: Number, default: 0 },
     clicked_message: { type: Number, default: 0 },
-    amount_raised: 0,
+    amount_raised: { type: Number, default: 0 },
     completed:{ type: Boolean, default: false }
   },
   category: {

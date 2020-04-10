@@ -2,6 +2,7 @@ version: "3.2"
 
 services:
   node:
+    container_name: ${NODE_NAME}
     build:
       context: .
       dockerfile: ./docker/node/Dockerfile
@@ -20,6 +21,7 @@ services:
       lhbridge:
         ipv4_address: ${NODE_IP}
   mongo:
+    container_name: ${MONGO_NAME}
     image: mongo
     restart: always
     ports:
