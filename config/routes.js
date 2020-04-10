@@ -57,6 +57,18 @@ module.exports = function(app, passport) {
     }
   });
 
+  app.post('/api-v1/check-user', function(req, res) {
+    let username = req.body.candidate
+    User.getUserByUsername(username, (err, user) => {
+      console.log(user)
+      if (user) {
+        res.send({valid: false}).end()
+      } else {
+        res.send({valid: true}).end()
+      }
+    })
+  })
+
   // Endpoint to login
   app.post(
     '/api-v1/login',
