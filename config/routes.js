@@ -211,13 +211,13 @@ module.exports = function(app, passport) {
   // });
   app.post('/api-v1/all-helps/:page', isAuth,  function(req, res) {
     let page = req.params.page || 1
-    let limit = 5
+    let limit = 8
     let start = page > 1 ? (page - 1) * (limit - 1) : 0
-    let end = page > 1 ? ((limit * page) - 1) : 4
+    let end = page > 1 ? ((limit * page) - 1) : limit - 1
     let location = req.body.location || { lat: 0, lng: 0 }
-    let all_helps = []
+    console.log(start, end)
     getDistancedHelps(location, page, 10, req.user ,(err, helps) => {
-      let paginated = helps.length >= end ? helps.slice( start, end ) : []
+      let paginated = helps.length >= end ? helps.slice( start, end ) : helps.slice(start, helps.length)
       res.send({"docs": paginated});
     })
   })
