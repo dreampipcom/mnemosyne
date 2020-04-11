@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
 const Schema = mongoose.Schema;
 const Profile = require('./profile');
 
@@ -39,6 +40,8 @@ HelpSchema.pre('find', function() {
   this.populate('user');
   this.populate('who_is_helping.user');
 });
+
+HelpSchema.plugin(mongoosePaginate);
 
 
 let Help = (module.exports = mongoose.model('Help', HelpSchema));

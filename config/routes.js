@@ -11,6 +11,9 @@ const pkg = require('../package.json');
 const home = require('../app/controllers/home');
 const User = mongoose.model('User');
 const Help = mongoose.model('Help');
+const CircularJSON = require('circular-json');
+
+
 
 /**
  * Expose
@@ -60,7 +63,6 @@ module.exports = function(app, passport) {
   app.post('/api-v1/check-user', function(req, res) {
     let username = req.body.candidate
     User.getUserByUsername(username, (err, user) => {
-      console.log(user)
       if (user) {
         res.send({valid: false}).end()
       } else {
@@ -207,10 +209,16 @@ module.exports = function(app, passport) {
   //       });
   //   });
   // });
-  app.get('/api-v1/all-helps', isAuth,  function(req, res) {
+  app.post('/api-v1/all-helps/:page', isAuth,  function(req, res) {
+    let page = req.params.page || 1
+    let limit = 5
+    let start = page > 1 ? (page - 1) * (limit - 1) : 0
+    let end = page > 1 ? ((limit * page) - 1) : 4
+    let location = req.body.location || { lat: 0, lng: 0 }
     let all_helps = []
-    Help.find( (err, helps) => { 
-      res.send(helps);
+    getDistancedHelps(location, page, 10, req.user ,(err, helps) => {
+      let paginated = helps.length >= end ? helps.slice( start, end ) : []
+      res.send({"docs": paginated});
     })
   })
 
@@ -221,6 +229,43 @@ module.exports = function(app, passport) {
       })
     })
   })
+
+  function getDistancedHelps(currentLocation, pageNumber, nPerPage, uid, callback) {
+    Help.paginate({"stats.completed":  false, "user": { $ne: uid } }, {sort:"-createdAt", limit: 200, populate: "user"})
+    .then((results) => {
+      let ordered = results.docs.sort((a, b) => {
+        if (currentLocation) {
+          let distanceA = distance(Number(currentLocation.lat), Number(currentLocation.lng), Number(a.location.lat), Number(a.location.lng), "K")
+          let distanceB = distance(Number(currentLocation.lat), Number(currentLocation.lng), Number(b.location.lat), Number(b.location.lng), "K")
+          return distanceA - distanceB
+        } else {
+          return a.createdAt - b.createdAt
+        }
+      })
+      callback(null, ordered)
+    })
+  }
+
+  function distance(lat1, lon1, lat2, lon2, unit) {
+    if ((lat1 === lat2) && (lon1 === lon2)) {
+      return 0
+    } else {
+      var radlat1 = Math.PI * lat1 / 180
+      var radlat2 = Math.PI * lat2 / 180
+      var theta = lon1 - lon2
+      var radtheta = Math.PI * theta / 180
+      var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta)
+      if (dist > 1) {
+        dist = 1
+      }
+      dist = Math.acos(dist)
+      dist = dist * 180 / Math.PI
+      dist = dist * 60 * 1.1515
+      if (unit === "K") { dist = dist * 1.609344 }
+      if (unit === "N") { dist = dist * 0.8684 }
+      return dist
+    }
+  }
 
 
   

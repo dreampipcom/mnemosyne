@@ -11,7 +11,6 @@ COPY package.json /app
 COPY . /app
 RUN npm install
 RUN npm install bcryptjs pm2 -g
-RUN npm install bcryptjs
 COPY ./docker/wait-for-it.sh /usr/local
 RUN chmod +x /usr/local/wait-for-it.sh
 
