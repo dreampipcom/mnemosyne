@@ -122,26 +122,30 @@ module.exports = function(app, passport) {
     let id = req.user._id;
     User.findById({ _id: id }, (err, user) => {
       if (err) throw err;
-      user.data.account_type = 1;
-      user.save((err, verified_user) => {
-        var data = {
-          to: user.data.email,
-          from: "Let's Hero <no-reply@letshero.com>",
-          template: 'verified',
-          subject: `Your account is now verified.`,
-          context: {
-            name: user.username
-          }
-        };
+      if (user) {
+        user.data.account_type = 1;
+        user.save((err, verified_user) => {
+          var data = {
+            to: user.data.email,
+            from: "Let's Hero <no-reply@letshero.com>",
+            template: 'verified',
+            subject: `Your account is now verified.`,
+            context: {
+              name: user.username
+            }
+          };
 
-        transport.sendMail(data, function(err) {
-          if (!err) {
-            res.send(verified_user).end();
-          } else {
-            throw err;
-          }
+          transport.sendMail(data, function(err) {
+            if (!err) {
+              res.send(verified_user).end();
+            } else {
+              throw err;
+            }
+          });
         });
-      });
+      } else {
+        throw new Error("Couldn't find user");
+      }
     });
   });
 
