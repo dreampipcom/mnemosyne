@@ -104,7 +104,7 @@ module.exports = function(app, passport) {
           if (!err) {
             res.send(user).end();
           } else {
-            User.findByIdAndDelete({ _id: user._id }, () => {
+            User.deleteOne({ username: user.username }, () => {
               throw err;
             });
           }
