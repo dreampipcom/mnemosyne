@@ -129,7 +129,7 @@ module.exports = function(app, passport) {
             to: user.data.email,
             from: "Let's Hero <no-reply@letshero.com>",
             template: 'verified',
-            subject: `Your account is now verified.`,
+            subject: `Your email is now verified.`,
             context: {
               name: user.username
             }
