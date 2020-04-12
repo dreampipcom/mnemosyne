@@ -8,23 +8,51 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const pkg = require('../package.json');
+const nodemailer = require('nodemailer');
+const hbs = require('nodemailer-express-handlebars');
+const path = require('path');
 const User = mongoose.model('User');
 const Help = mongoose.model('Help');
+
+let transport = nodemailer.createTransport({
+  host: process.env.CC_SERVER,
+  port: 587,
+  secure: false, // upgrade later with STARTTLS
+  auth: {
+    user: process.env.CC_USER,
+    pass: process.env.CC_PASS
+  }
+});
+
+let handlebarsOptions = {
+  viewEngine: {
+    extName: '.html',
+    partialsDir: path.join(__dirname, '../app/email-templates'),
+    layoutsDir: path.join(__dirname, '../app/email-templates'),
+    defaultLayout: ''
+  },
+  viewPath: path.join(__dirname, '../app/email-templates'),
+  extName: '.html'
+};
 
 /**
  * Expose
  */
 
 module.exports = function(app, passport) {
-  let corsOpt = {
-    origin: 'http://localhost:8080',
-    credentials: true
-  };
+  if (process.env.IS_SECURE === 'false') {
+    let corsOpt = {
+      origin: 'http://localhost:8080',
+      credentials: true
+    };
+
+    app.options('*', cors(corsOpt));
+    app.use(cors(corsOpt));
+  }
+
+  transport.use('compile', hbs(handlebarsOptions));
 
   let isAuth = passport.authenticate('jwt', { session: false });
-
-  app.options('*', cors(corsOpt));
-  app.use(cors(corsOpt));
 
   // app.get('/', home.index);
 
@@ -51,7 +79,34 @@ module.exports = function(app, passport) {
       });
       User.createUser(newUser, function(err, user) {
         if (err) throw err;
-        res.send(user).end();
+
+        /** This is what ends up in our JWT */
+        const payload = {
+          username: user.username,
+          expires: Date.now() + 24 * 60 * 60 * 1000
+        };
+
+        /** generate a signed json web token and return it in the response */
+        const token = jwt.sign(JSON.stringify(payload), pkg.name);
+
+        var data = {
+          to: user.data.email,
+          from: 'no-reply@letshero.com',
+          template: 'welcome',
+          subject: `Welcome ${user.username}! Now, please verify your email.`,
+          context: {
+            url: `${process.env.APP_URL}/verify/${token}`,
+            name: user.username
+          }
+        };
+
+        transport.sendMail(data, function(err) {
+          if (!err) {
+            res.send(user).end();
+          } else {
+            throw err;
+          }
+        });
       });
     } else {
       res
@@ -59,6 +114,33 @@ module.exports = function(app, passport) {
         .send('{errors: "Passwords don\'t match"}')
         .end();
     }
+  });
+
+  app.get('/api-v1/verify', isAuth, function(req, res) {
+    let id = req.user._id;
+    User.findById({ _id: id }, (err, user) => {
+      if (err) throw err;
+      user.data.account_type = 1;
+      user.save((err, verified_user) => {
+        var data = {
+          to: user.data.email,
+          from: 'no-reply@letshero.com',
+          template: 'welcome',
+          subject: `Your account is now verified.`,
+          context: {
+            name: user.username
+          }
+        };
+
+        transport.sendMail(data, function(err) {
+          if (!err) {
+            res.send(verified_user).end();
+          } else {
+            throw err;
+          }
+        });
+      });
+    });
   });
 
   app.post('/api-v1/check-user', function(req, res) {
