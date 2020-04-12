@@ -5,6 +5,7 @@ RUN apk update
 RUN apk upgrade
 RUN apk add bash
 RUN apk add busybox-extras
+RUN apk add bind-tools
 
 WORKDIR /app
 COPY package.json /app
