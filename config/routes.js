@@ -24,6 +24,8 @@ let transport = nodemailer.createTransport({
   }
 });
 
+console.log(transport);
+
 let handlebarsOptions = {
   viewEngine: {
     extName: '.html',
