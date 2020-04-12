@@ -8,12 +8,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const pkg = require('../package.json');
-const home = require('../app/controllers/home');
 const User = mongoose.model('User');
 const Help = mongoose.model('Help');
-const CircularJSON = require('circular-json');
-
-
 
 /**
  * Expose
@@ -37,7 +33,12 @@ module.exports = function(app, passport) {
     var password = req.body.password;
     var password2 = req.body.password_verify;
 
-    if (password && password.length >= 6 && password2 && password === password2) {
+    if (
+      password &&
+      password.length >= 6 &&
+      password2 &&
+      password === password2
+    ) {
       var newUser = new User({
         username: req.body.username,
         password: password,
@@ -45,7 +46,7 @@ module.exports = function(app, passport) {
           email: req.body.email,
           paypal: req.body.paypal,
           whatsapp: req.body.whatsapp,
-          gender: req.body.gender,
+          gender: req.body.gender
         }
       });
       User.createUser(newUser, function(err, user) {
@@ -61,15 +62,15 @@ module.exports = function(app, passport) {
   });
 
   app.post('/api-v1/check-user', function(req, res) {
-    let username = req.body.candidate
+    let username = req.body.candidate;
     User.getUserByUsername(username, (err, user) => {
       if (user) {
-        res.send({valid: false}).end()
+        res.send({ valid: false }).end();
       } else {
-        res.send({valid: true}).end()
+        res.send({ valid: true }).end();
       }
-    })
-  })
+    });
+  });
 
   // Endpoint to login
   app.post(
@@ -121,154 +122,92 @@ module.exports = function(app, passport) {
     return res.send({ authenticated: req.isAuthenticated() });
   });
 
-  // // Endpoint to get Bookings data
-  // app.get('/api-v1/bookings', function(req, res) {
-  //   let username = (req.user && req.user.username) || process.env.PUBLIC_USER;
-  //   User.getUserByUsername(username, (err, user) => {
-  //     user.populate('bookedDates', (err, fullUser) => {
-  //       // let dateOffset = 24 * 60 * 60 * 1000 * 2; //2 days
-  //       let now = new Date(new Date().setDate(new Date().getDate() - 2));
-  //       let nextDates = fullUser.bookedDates.filter(el => {
-  //         return (
-  //           el.date > now &&
-  //           el.date.getUTCFullYear() <= now.getUTCFullYear() + 1
-  //         );
-  //       });
-  //       var separatedDates = [];
-  //       nextDates.forEach(el => {
-  //         var year = el.date.getUTCFullYear().toString();
-  //         var existingYears = separatedDates.map(el => Object.keys(el)[0]);
-  //         if (existingYears.indexOf(year) === -1) {
-  //           separatedDates.push({ [year]: [] });
-  //         }
-  //         existingYears = separatedDates.map(el => Object.keys(el)[0]);
+  app.post('/api-v1/all-helps/:page', isAuth, function(req, res) {
+    let page = req.params.page || 1;
+    let limit = 8;
+    let start = page > 1 ? (page - 1) * (limit - 1) : 0;
+    let end = page > 1 ? limit * page - 1 : limit - 1;
+    let location = req.body.location || { lat: 0, lng: 0 };
+    console.log(start, end);
+    getDistancedHelps(location, page, 10, req.user, (err, helps) => {
+      let paginated =
+        helps.length >= end
+          ? helps.slice(start, end)
+          : helps.slice(start, helps.length);
+      res.send({ docs: paginated });
+    });
+  });
 
-  //         let index = -1;
-  //         separatedDates.forEach((date, i) => {
-  //           if (Object.keys(date)[0] == year)
-  //             index = existingYears.indexOf(year);
-  //         });
-  //         separatedDates[index][year].push(el);
-  //       });
-  //       let orderedArrayByYear = separatedDates.sort(function(a, b) {
-  //         return Object.keys(a)[0] - Object.keys(b)[0];
-  //       });
-  //       let orderedArrayByEvents = orderedArrayByYear.map(el => {
-  //         return {
-  //           [Object.keys(el)[0]]: el[Object.keys(el)[0]].sort(function(a, b) {
-  //             return a.date - b.date;
-  //           })
-  //         };
-  //       });
-  //       res.send(orderedArrayByEvents);
-  //     });
-  //   });
-  // });
+  app.get('/api-v1/help/:id', isAuth, function(req, res) {
+    Help.findOne({ _id: req.params.id }, (err, help) => {
+      help.populate('user', (err, fullhelp) => {
+        res.send(fullhelp);
+      });
+    });
+  });
 
-  // Endpoint to get ALL Bookings data
-  // app.get('/api-v1/all-helps', isAuth, function(req, res) {
-  //   let username = (req.user && req.user.username) || process.env.PUBLIC_USER;
-  //   User.getUserByUsername(username, (err, user) => {
-  //     user.populate('bookedDates', (err, fullUser) => {
-  //       let nextDates = fullUser.bookedDates;
-  //       var separatedDates = [];
-  //       nextDates.forEach(el => {
-  //         var year = el.date.getUTCFullYear().toString();
-  //         var existingYears = separatedDates.map(el => Object.keys(el)[0]);
-  //         if (existingYears.indexOf(year) === -1) {
-  //           separatedDates.push({ [year]: [] });
-  //         }
-  //         existingYears = separatedDates.map(el => Object.keys(el)[0]);
-
-  //         let index = -1;
-  //         separatedDates.forEach((date, i) => {
-  //           if (Object.keys(date)[0] == year)
-  //             index = existingYears.indexOf(year);
-  //         });
-  //         separatedDates[index][year].push(el);
-  //       });
-  //       let orderedArrayByYear = separatedDates.sort(function(a, b) {
-  //         return Object.keys(a)[0] - Object.keys(b)[0];
-  //       });
-  //       let orderedArrayByEvents = orderedArrayByYear.map(el => {
-  //         return {
-  //           [Object.keys(el)[0]]: el[Object.keys(el)[0]].sort(function(a, b) {
-  //             return a.date - b.date;
-  //           })
-  //         };
-  //       });
-  //       res.send(orderedArrayByEvents);
-  //     });
-  //   });
-  // });
-
-  // app.get('/api-v1/all-helps', isAuth, function(req, res) {
-  //   Help.find((err, helps) => {
-  //       helps.populate('who_is_helping.user', (err, fullHelp) => {
-  //         res.send(fullHelp);
-  //       });
-  //   });
-  // });
-  app.post('/api-v1/all-helps/:page', isAuth,  function(req, res) {
-    let page = req.params.page || 1
-    let limit = 8
-    let start = page > 1 ? (page - 1) * (limit - 1) : 0
-    let end = page > 1 ? ((limit * page) - 1) : limit - 1
-    let location = req.body.location || { lat: 0, lng: 0 }
-    console.log(start, end)
-    getDistancedHelps(location, page, 10, req.user ,(err, helps) => {
-      let paginated = helps.length >= end ? helps.slice( start, end ) : helps.slice(start, helps.length)
-      res.send({"docs": paginated});
-    })
-  })
-
-  app.get('/api-v1/help/:id', isAuth,  function(req, res) {
-    Help.findOne({ _id: req.params.id }, (err, help) => { 
-      help.populate('user',  (err, fullhelp) => {
-          res.send(fullhelp);
-      })
-    })
-  })
-
-  function getDistancedHelps(currentLocation, pageNumber, nPerPage, uid, callback) {
-    Help.paginate({"stats.completed":  false, "user": { $ne: uid } }, {sort:"-createdAt", limit: 200, populate: "user"})
-    .then((results) => {
+  function getDistancedHelps(
+    currentLocation,
+    pageNumber,
+    nPerPage,
+    uid,
+    callback
+  ) {
+    Help.paginate(
+      { 'stats.completed': false, user: { $ne: uid } },
+      { sort: '-createdAt', limit: 200, populate: 'user' }
+    ).then(results => {
       let ordered = results.docs.sort((a, b) => {
         if (currentLocation) {
-          let distanceA = distance(Number(currentLocation.lat), Number(currentLocation.lng), Number(a.location.lat), Number(a.location.lng), "K")
-          let distanceB = distance(Number(currentLocation.lat), Number(currentLocation.lng), Number(b.location.lat), Number(b.location.lng), "K")
-          return distanceA - distanceB
+          let distanceA = distance(
+            Number(currentLocation.lat),
+            Number(currentLocation.lng),
+            Number(a.location.lat),
+            Number(a.location.lng),
+            'K'
+          );
+          let distanceB = distance(
+            Number(currentLocation.lat),
+            Number(currentLocation.lng),
+            Number(b.location.lat),
+            Number(b.location.lng),
+            'K'
+          );
+          return distanceA - distanceB;
         } else {
-          return a.createdAt - b.createdAt
+          return a.createdAt - b.createdAt;
         }
-      })
-      callback(null, ordered)
-    })
+      });
+      callback(null, ordered);
+    });
   }
 
   function distance(lat1, lon1, lat2, lon2, unit) {
-    if ((lat1 === lat2) && (lon1 === lon2)) {
-      return 0
+    if (lat1 === lat2 && lon1 === lon2) {
+      return 0;
     } else {
-      var radlat1 = Math.PI * lat1 / 180
-      var radlat2 = Math.PI * lat2 / 180
-      var theta = lon1 - lon2
-      var radtheta = Math.PI * theta / 180
-      var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta)
+      var radlat1 = (Math.PI * lat1) / 180;
+      var radlat2 = (Math.PI * lat2) / 180;
+      var theta = lon1 - lon2;
+      var radtheta = (Math.PI * theta) / 180;
+      var dist =
+        Math.sin(radlat1) * Math.sin(radlat2) +
+        Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
       if (dist > 1) {
-        dist = 1
+        dist = 1;
       }
-      dist = Math.acos(dist)
-      dist = dist * 180 / Math.PI
-      dist = dist * 60 * 1.1515
-      if (unit === "K") { dist = dist * 1.609344 }
-      if (unit === "N") { dist = dist * 0.8684 }
-      return dist
+      dist = Math.acos(dist);
+      dist = (dist * 180) / Math.PI;
+      dist = dist * 60 * 1.1515;
+      if (unit === 'K') {
+        dist = dist * 1.609344;
+      }
+      if (unit === 'N') {
+        dist = dist * 0.8684;
+      }
+      return dist;
     }
   }
-
-
-  
 
   // Endpoint to add Help data
   app.post('/api-v1/help', isAuth, function(req, res) {
@@ -277,59 +216,94 @@ module.exports = function(app, passport) {
     });
     Help.addHelp(req.body.id, newHelp, (err, user) => {
       if (err) {
-        res.status(500).send(err).end()
+        res
+          .status(500)
+          .send(err)
+          .end();
       }
       res.send(user).end();
     });
   });
 
-
   // Endpoint to asusme help
   app.post('/api-v1/assume-help', isAuth, function(req, res) {
-      let help_id = req.body.payload.help_id
-      let uid = req.body.uid
-      
-      Help.findOne({_id:help_id}, (err, help) => {
-        let already = help.who_is_helping.findIndex(el => {
-          return el.user === uid
-        })
-        if (help.user._id == uid) {
-          res.status(403).send({ message: "Can't help yourself!" })
-        } else if (already > -1) {
-          res.status(403).send({ message: "Can't help twice!" })
-        } else {
-          Help.assumeHelp(help_id, help, req.body.uid, (err, help) => {
-            res.send(help).end();
-          });
-        }
-      })
+    let help_id = req.body.payload.help_id;
+    let uid = req.body.uid;
+
+    Help.findOne({ _id: help_id }, (err, help) => {
+      let already = help.who_is_helping.findIndex(el => {
+        return el.user === uid;
+      });
+      if (help.user._id == uid) {
+        res.status(403).send({ message: "Can't help yourself!" });
+      } else if (already > -1) {
+        res.status(403).send({ message: "Can't help twice!" });
+      } else {
+        Help.assumeHelp(help_id, help, req.body.uid, (err, help) => {
+          res.send(help).end();
+        });
+      }
+    });
   });
 
   // Endpoint to asusme help
   app.post('/api-v1/evaluate-help', isAuth, function(req, res) {
-    let help_id = req.body.help_id
-    let helper_id = req.body.helper_id
-    let payload = req.body.new_status
-    
-      Help.evaluateHelp(help_id, helper_id, payload, (err, help) => {
-        res.send(help).end();
-      });
-});
+    let help_id = req.body.help_id;
+    let helper_id = req.body.helper_id;
+    let payload = req.body.new_status;
 
-// Endpoint to asusme help
-app.post('/api-v1/complete-help', isAuth, function(req, res) {
-  let help_id = req.body.help_id
-  Help.completeHelp(help_id, (err, help) => {
-    res.send(help.stats.completed).end();
+    Help.evaluateHelp(help_id, helper_id, payload, (err, help) => {
+      res.send(help).end();
+    });
   });
-});
 
-  // // Endpoint to add Bookings data
-  // app.put('/api-v1/bookings', isAuth, function(req, res) {
-  //   Bookings.editBooking(req.body.id, req.body.payload, (err, booking) => {
-  //     res.send(booking).end();
-  //   });
-  // });
+  // Endpoint to asusme help
+  app.post('/api-v1/complete-help', isAuth, function(req, res) {
+    let help_id = req.body.help_id;
+    Help.completeHelp(help_id, (err, help) => {
+      res.send(help.stats.completed).end();
+    });
+  });
+
+  // Endpoint to edit profile
+  app.put('/api-v1/profile', isAuth, function(req, res) {
+    let match_pass =
+      (req.body.payload && req.body.payload.new_password) ===
+      (req.body.payload && req.body.payload.new_password_ver);
+    if (!match_pass) {
+      res
+        .status(500)
+        .send("Passwords don't match")
+        .end();
+    }
+    let user = {
+      id: req.body && req.body.id,
+      username: req.body.payload && req.body.payload.username,
+      password: (match_pass && req.body.payload.new_password) || null,
+      data: {
+        email:
+          req.body.payload &&
+          req.body.payload.data &&
+          req.body.payload.data.email,
+        paypal:
+          req.body.payload &&
+          req.body.payload.data &&
+          req.body.payload.data.paypal,
+        whatsapp:
+          req.body.payload &&
+          req.body.payload.data &&
+          req.body.payload.data.whatsapp,
+        gender:
+          req.body.payload &&
+          req.body.payload.data &&
+          req.body.payload.data.gender
+      }
+    };
+    User.editProfile(user, (err, saved_user) => {
+      if (err) throw err;
+      res.send(saved_user).end();
+    });
+  });
 
   // // Endpoint to delete Bookings data
   // app.delete('/api-v1/bookings', isAuth, function(req, res) {

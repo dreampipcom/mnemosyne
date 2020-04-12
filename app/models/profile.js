@@ -12,9 +12,10 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
   username: { type: String, unique: true, required: true },
   password: {
-    type: String, required: true
+    type: String,
+    required: true
   },
-  data:  {
+  data: {
     email: { type: String, default: '', unique: false, required: true },
     paypal: { type: String, default: '', unique: false },
     whatsapp: { type: String, default: '', unique: false, required: true },
@@ -32,13 +33,10 @@ const UserSchema = new Schema({
     medals: { type: Number, default: 0 },
     trophees: { type: Number, default: 0 },
     title: { type: String, default: 'Apprentice' },
-    title_id: { type: Number, default: 0 },
+    title_id: { type: Number, default: 0 }
   },
-  title: {
-    
-  }
+  title: {}
 });
-
 
 /**
  * Add your
@@ -52,7 +50,7 @@ const UserSchema = new Schema({
  */
 
 // ProfileSchema.method({});
- UserSchema.method({});
+UserSchema.method({});
 // StatsSchema.method({});
 // TitleSchema.method({});
 
@@ -61,7 +59,7 @@ const UserSchema = new Schema({
  */
 
 //ProfileSchema.static({});
- UserSchema.static({});
+UserSchema.static({});
 // StatsSchema.static({});
 // TitleSchema.static({});
 
@@ -86,7 +84,7 @@ module.exports.User.getUserByUsername = function(username, callback) {
   var query = { username: username };
   User.findOne(query, (err, user) => {
     if (err) throw err;
-    callback(null, user)
+    callback(null, user);
   });
 };
 
@@ -94,9 +92,31 @@ module.exports.User.getUserById = function(id, callback) {
   User.findById(id, callback);
 };
 
-module.exports.User.comparePassword = function(candidatePassword, hash, callback) {
+module.exports.User.comparePassword = function(
+  candidatePassword,
+  hash,
+  callback
+) {
   bcrypt.compare(candidatePassword, hash, function(err, isMatch) {
     if (err) throw err;
     callback(null, isMatch);
+  });
+};
+
+module.exports.User.editProfile = function(data, callback) {
+  bcrypt.genSalt(10, function(err, salt) {
+    bcrypt.hash(data.password, salt, function(err, hash) {
+      User.findById(data.id, (err, user) => {
+        user.username = data.username || user.username;
+        user.password = hash || user.password;
+        user.data.email = data.data.email || user.data.email;
+        user.data.paypal = data.data.paypal || user.data.paypal;
+        user.data.whatsapp = data.data.whatsapp || user.data.whatsapp;
+        user.data.gender = data.data.gender || user.data.gender;
+        user.save((err, saved) => {
+          callback(null, saved);
+        });
+      });
+    });
   });
 };
