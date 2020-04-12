@@ -149,6 +149,45 @@ module.exports = function(app, passport) {
     });
   });
 
+  app.post('/api-v1/reset', function(req, res) {
+    let email = req.body.email;
+    User.findOne({ 'data.email': email }, (err, user) => {
+      if (user) {
+        /** This is what ends up in our JWT */
+        const payload = {
+          username: user.username,
+          expires: Date.now() + 24 * 60 * 60 * 100
+        };
+
+        /** generate a signed json web token and return it in the response */
+        const token = jwt.sign(JSON.stringify(payload), pkg.name);
+
+        var data = {
+          to: user.data.email,
+          from: "Let's Hero <no-reply@letshero.com>",
+          template: 'forgot',
+          subject: `Hey ${user.username}, have you forgotten your password?`,
+          context: {
+            url: `${process.env.APP_URL}/reset/${token}`,
+            name: user.username
+          }
+        };
+
+        transport.sendMail(data, function(err) {
+          if (!err) {
+            res.send('Looking up.').end();
+          } else {
+            res.send('Looking up.').end();
+          }
+        });
+      } else if (err) {
+        res.send('Looking up.').end();
+      } else {
+        res.send('Looking up.').end();
+      }
+    });
+  });
+
   app.post('/api-v1/check-user', function(req, res) {
     let username = req.body.candidate;
     User.getUserByUsername(username, (err, user) => {
@@ -355,6 +394,7 @@ module.exports = function(app, passport) {
 
   // Endpoint to edit profile
   app.put('/api-v1/profile', isAuth, function(req, res) {
+    console.log(req.body.payload);
     let match_pass =
       (req.body.payload && req.body.payload.new_password) ===
       (req.body.payload && req.body.payload.new_password_ver);
@@ -365,7 +405,7 @@ module.exports = function(app, passport) {
         .end();
     }
     let user = {
-      id: req.body && req.body.id,
+      id: req.user && req.user._id,
       username: req.body.payload && req.body.payload.username,
       password: (match_pass && req.body.payload.new_password) || null,
       data: {
@@ -387,6 +427,7 @@ module.exports = function(app, passport) {
           req.body.payload.data.gender
       }
     };
+    console.log(user);
     User.editProfile(user, (err, saved_user) => {
       if (err) throw err;
       res.send(saved_user).end();

@@ -9,9 +9,8 @@ const HelpSchema = Schema({
     views: { type: Number, default: 0 },
     clicked_message: { type: Number, default: 0 },
     clicked_donate: { type: Number, default: 0 },
-    clicked_message: { type: Number, default: 0 },
     amount_raised: { type: Number, default: 0 },
-    completed:{ type: Boolean, default: false }
+    completed: { type: Boolean, default: false }
   },
   category: {
     main_category: { type: String, default: 'Other', required: true },
@@ -23,17 +22,24 @@ const HelpSchema = Schema({
   location: {
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
-    place_name: { type: String, required: true },
+    place_name: { type: String, required: true }
   },
-  reward: { 
+  reward: {
     value: { type: Number, required: false },
     type: { type: Number, required: true },
     other_reward: { type: String, required: false }
   },
-  who_is_helping: [{
-    user: { type: Schema.Types.ObjectId, ref: 'User', unique: true, sparse: true },
-    hasHelped: { type: Number, default: 0 }
-  }]
+  who_is_helping: [
+    {
+      user: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        unique: true,
+        sparse: true
+      },
+      hasHelped: { type: Number, default: 0 }
+    }
+  ]
 });
 
 HelpSchema.pre('find', function() {
@@ -43,17 +49,16 @@ HelpSchema.pre('find', function() {
 
 HelpSchema.plugin(mongoosePaginate);
 
-
 let Help = (module.exports = mongoose.model('Help', HelpSchema));
 
 Help();
 
 module.exports.addHelp = function(userId, helpData, callback) {
   Profile.User.findById({ _id: userId }, (err, user) => {
-    helpData.user = user
+    helpData.user = user;
     helpData.save((err, help) => {
       if (err) {
-        callback(err)
+        callback(err);
       }
       Profile.User.findById({ _id: userId }, (err, user) => {
         user.my_helps.push(help);
@@ -65,39 +70,41 @@ module.exports.addHelp = function(userId, helpData, callback) {
 
 module.exports.assumeHelp = function(helpId, help, userId, callback) {
   Profile.User.findById({ _id: userId }, (err, user) => {
-    user.im_helping.push(help)
+    user.im_helping.push(help);
     user.save(() => {
-      Help.findById({ _id:helpId }, (err, the_help) => {
-        the_help.who_is_helping.push({ ... { user: user, hasHelped: 0 } })
-        the_help.save(callback)
-      })
-    })
+      Help.findById({ _id: helpId }, (err, the_help) => {
+        the_help.who_is_helping.push({ ...{ user: user, hasHelped: 0 } });
+        the_help.save(callback);
+      });
+    });
   });
 };
 
 module.exports.evaluateHelp = function(help_id, helper_id, payload, callback) {
-  Help.findOne( {_id: help_id }, function(err, the_help) {
-    the_help.who_is_helping.forEach(function (el) {
-      if(el._id == helper_id) {
-        let old_value = el.hasHelped
-        el.hasHelped = payload
+  Help.findOne({ _id: help_id }, function(err, the_help) {
+    the_help.who_is_helping.forEach(function(el) {
+      if (el._id == helper_id) {
+        let old_value = el.hasHelped;
+        el.hasHelped = payload;
         the_help.save(() => {
-          Profile.User.findOne({_id:el.user}, (err, user) => {
-            user.stats.points = user.stats.points + (((payload - old_value)) * (10 - the_help.category.urgency))
-            user.save(callback)
-          })
-        })
+          Profile.User.findOne({ _id: el.user }, (err, user) => {
+            user.stats.points =
+              user.stats.points +
+              (payload - old_value) * (10 - the_help.category.urgency);
+            user.save(callback);
+          });
+        });
       }
-    })
+    });
   });
-}
+};
 
 module.exports.completeHelp = function(help_id, callback) {
-  Help.findOne( {_id: help_id }, function(err, the_help) {
-    the_help.stats.completed = true
-    the_help.save(callback)
+  Help.findOne({ _id: help_id }, function(err, the_help) {
+    the_help.stats.completed = true;
+    the_help.save(callback);
   });
-}
+};
 
 // module.exports.editBooking = function(bookingId, helpData, callback) {
 //   helpData = helpData.payload;
