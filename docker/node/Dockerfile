@@ -4,6 +4,7 @@ FROM node:10.12.0-alpine
 RUN apk update
 RUN apk upgrade
 RUN apk add bash
+RUN apk add busybox-extras
 
 WORKDIR /app
 COPY package.json /app
