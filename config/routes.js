@@ -24,8 +24,6 @@ let transport = nodemailer.createTransport({
   }
 });
 
-console.log(transport);
-
 let handlebarsOptions = {
   viewEngine: {
     extName: '.html',
@@ -106,7 +104,9 @@ module.exports = function(app, passport) {
           if (!err) {
             res.send(user).end();
           } else {
-            throw err;
+            User.findByIdAndDelete({ _id: user._id }, () => {
+              throw err;
+            });
           }
         });
       });
