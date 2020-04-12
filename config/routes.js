@@ -125,7 +125,7 @@ module.exports = function(app, passport) {
         var data = {
           to: user.data.email,
           from: 'no-reply@letshero.com',
-          template: 'welcome',
+          template: 'verified',
           subject: `Your account is now verified.`,
           context: {
             name: user.username
