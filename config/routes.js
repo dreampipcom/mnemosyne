@@ -17,7 +17,7 @@ const Help = mongoose.model('Help');
 let transport = nodemailer.createTransport({
   host: process.env.CC_SERVER,
   port: 587,
-  secure: true, // upgrade later with STARTTLS
+  secure: false, // upgrade later with STARTTLS
   auth: {
     user: process.env.CC_USER,
     pass: process.env.CC_PASS
