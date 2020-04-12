@@ -91,7 +91,7 @@ module.exports = function(app, passport) {
 
         var data = {
           to: user.data.email,
-          from: 'no-reply@letshero.com',
+          from: "Let's Hero <no-reply@letshero.com>",
           template: 'welcome',
           subject: `Welcome ${user.username}! Now, please verify your email.`,
           context: {
@@ -126,7 +126,7 @@ module.exports = function(app, passport) {
       user.save((err, verified_user) => {
         var data = {
           to: user.data.email,
-          from: 'no-reply@letshero.com',
+          from: "Let's Hero <no-reply@letshero.com>",
           template: 'verified',
           subject: `Your account is now verified.`,
           context: {
