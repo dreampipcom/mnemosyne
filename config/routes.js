@@ -394,7 +394,6 @@ module.exports = function(app, passport) {
 
   // Endpoint to edit profile
   app.put('/api-v1/profile', isAuth, function(req, res) {
-    console.log(req.body.payload);
     let match_pass =
       (req.body.payload && req.body.payload.new_password) ===
       (req.body.payload && req.body.payload.new_password_ver);
@@ -427,7 +426,6 @@ module.exports = function(app, passport) {
           req.body.payload.data.gender
       }
     };
-    console.log(user);
     User.editProfile(user, (err, saved_user) => {
       if (err) throw err;
       res.send(saved_user).end();
