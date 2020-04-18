@@ -35,9 +35,10 @@ const HelpSchema = Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
         unique: true,
-        sparse: true
+        sparse: true,
+        required: true
       },
-      hasHelped: { type: Number, default: 0 }
+      hasHelped: { type: Number, default: 0, required: true }
     }
   ]
 });
