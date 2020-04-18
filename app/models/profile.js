@@ -23,10 +23,10 @@ const UserSchema = new Schema({
     account_type: { type: Number, default: 0, unique: false }
   },
   my_helps: {
-    type: [{ type: Schema.Types.ObjectId, ref: 'Help' }]
+    type: [{ type: Schema.Types.ObjectId, ref: 'Help', unique: true }]
   },
   im_helping: {
-    type: [{ type: Schema.Types.ObjectId, ref: 'Help' }]
+    type: [{ type: Schema.Types.ObjectId, ref: 'Help', unique: true }]
   },
   stats: {
     points: { type: Number, default: 0 },
