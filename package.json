@@ -13,7 +13,9 @@
     "start": "cross-env NODE_ENV=development nodemon server.js",
     "test": "cross-env NODE_ENV=test babel-tape-runner test/test-*.js",
     "pretest": "eslint .",
-    "prod": "pm2-runtime start ecosystem.config.js --env production"
+    "prod": "pm2-runtime start ecosystem.config.js --env production",
+    "prepare": "npm run snyk-protect",
+    "snyk-protect": "snyk-protect"
   },
   "dependencies": {
     "body-parser": "~1.19.0",
@@ -38,10 +40,11 @@
     "nodemailer-express-handlebars": "^4.0.0",
     "passport": "~0.4.0",
     "passport-local": "~1.0.0",
-    "pm2": "~3.5.0",
+    "pm2": "~4.5.6",
     "pug": "~2.0.3",
     "view-helpers": "~0.2.0",
-    "winston": "~3.2.1"
+    "winston": "~3.2.1",
+    "@snyk/protect": "latest"
   },
   "devDependencies": {
     "babel-eslint": "~10.0.1",
@@ -68,5 +71,6 @@
     "node",
     "mongoose",
     "express"
-  ]
+  ],
+  "snyk": true
 }

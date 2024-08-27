@@ -1,0 +1,30 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.25.1
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-567746:
+    - pm2 > async > lodash:
+        patched: '2024-08-27T08:28:21.848Z'
+        id: SNYK-JS-LODASH-567746
+        path: pm2 > async > lodash
+    - pm2 > @pm2/agent > async > lodash:
+        patched: '2024-08-27T08:28:21.848Z'
+        id: SNYK-JS-LODASH-567746
+        path: pm2 > @pm2/agent > async > lodash
+    - pm2 > @pm2/io > async > lodash:
+        patched: '2024-08-27T08:28:21.848Z'
+        id: SNYK-JS-LODASH-567746
+        path: pm2 > @pm2/io > async > lodash
+    - pm2 > @pm2/js-api > async > lodash:
+        patched: '2024-08-27T08:28:21.848Z'
+        id: SNYK-JS-LODASH-567746
+        path: pm2 > @pm2/js-api > async > lodash
+    - pm2 > pm2-deploy > async > lodash:
+        patched: '2024-08-27T08:28:21.848Z'
+        id: SNYK-JS-LODASH-567746
+        path: pm2 > pm2-deploy > async > lodash
+    - pm2 > vizion > async > lodash:
+        patched: '2024-08-27T08:28:21.848Z'
+        id: SNYK-JS-LODASH-567746
+        path: pm2 > vizion > async > lodash
