@@ -41,7 +41,7 @@
     "pm2": "~5.4.0",
     "pug": "~3.0.3",
     "view-helpers": "~0.2.0",
-    "winston": "~3.3.4"
+    "winston": "~3.18.3"
   },
   "devDependencies": {
     "babel-eslint": "~10.0.1",
